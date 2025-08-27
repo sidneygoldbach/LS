@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI - Assistente de Voz</title>
+    
+    <!-- Meta tags para Facebook -->
+    <meta property="og:title" content="AI - Assistente de Voz">
+    <meta property="og:description" content="Faça perguntas por voz e receba respostas em áudio">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://seu-dominio.com">
+    <meta property="og:image" content="https://seu-dominio.com/icon.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="microphone-icon" id="micIcon">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V4C15 2.34 13.66 1 12 1Z" fill="#4A90E2"/>
+                    <path d="M19 10V12C19 16.42 15.42 20 11 20H13C17.42 20 21 16.42 21 12V10H19Z" fill="#4A90E2"/>
+                    <path d="M5 10V12C5 16.42 8.58 20 13 20H11C6.58 20 3 16.42 3 12V10H5Z" fill="#4A90E2"/>
+                    <path d="M12 22V20" stroke="#4A90E2" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 22H16" stroke="#4A90E2" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <button class="voice-button" id="voiceButton">
+                <span id="buttonText">Fazer Pergunta</span>
+            </button>
+            
+            <div class="status-message" id="statusMessage"></div>
+            
+            <!-- Painel da Pergunta -->
+            <div class="question-container" id="questionContainer">
+                <div class="question-text" id="questionText">Digite ou fale sua pergunta...</div>
+                <div class="input-container">
+                    <input type="text" class="question-input" id="questionInput" placeholder="Digite sua pergunta aqui...">
+                    <button class="send-button" id="sendButton" style="display: none;">Enviar</button>
+                </div>
+            </div>
+            
+            <!-- Painel da Resposta -->
+            <div class="response-container" id="responseContainer">
+                <div class="response-text" id="responseText">Aguardando sua pergunta...</div>
+                <div class="audio-player" id="audioPlayer">
+                    <audio controls id="responseAudio"></audio>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Clique no botão e faça sua pergunta por voz</p>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="ai-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
