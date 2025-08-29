@@ -1,0 +1,53 @@
+// Service Worker para Lottery Scanner PWA
+
+const CACHE_NAME = 'lottery-scanner-v1';
+const urlsToCache = [
+    '/lottery-scanner.html',
+    '/lottery-scanner.css',
+    '/lottery-scanner.js',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'
+];
+
+// Instalar Service Worker
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                console.log('Cache aberto');
+                return cache.addAll(urlsToCache);
+            })
+    );
+});
+
+// Interceptar requisições
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                // Retornar do cache se disponível
+                if (response) {
+                    return response;
+                }
+                
+                // Caso contrário, buscar da rede
+                return fetch(event.request);
+            }
+        )
+    );
+});
+
+// Atualizar Service Worker
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('Removendo cache antigo:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
