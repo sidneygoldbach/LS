@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples do Botão SCAN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            display: block;
+            width: 100%;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Teste Simples do Botão SCAN</h1>
+        
+        <button id="testBasic" class="test-btn">1. Teste Básico de Clique</button>
+        <button id="testScanButton" class="test-btn">2. Testar Botão SCAN Original</button>
+        <button id="testLotteryScanner" class="test-btn">3. Testar LotteryScanner Diretamente</button>
+        <button id="testCreateInstance" class="test-btn">4. Criar Nova Instância</button>
+        <button id="clearLog" class="test-btn" style="background: #dc3545;">Limpar Log</button>
+        
+        <div id="logArea" class="log-area">Aguardando testes...
+</div>
+    </div>
+
+    <!-- Incluir o CSS original -->
+    <link rel="stylesheet" href="lottery-scanner.css">
+    
+    <!-- Incluir o HTML original (invisível) -->
+    <div style="display: none;">
+        <div class="container">
+            <div class="header">
+                <h1>🎰 Lottery Scanner</h1>
+                <p>Escaneie seu bilhete da Powerball</p>
+            </div>
+            
+            <div class="scanner-section">
+                <button id="scanButton" class="scan-btn">
+                    <span id="scanText">📷 SCAN</span>
+                    <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+                </button>
+                
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let logArea = document.getElementById('logArea');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.textContent += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        function clearLog() {
+            logArea.textContent = 'Log limpo...\n';
+        }
+        
+        // Teste 1: Básico
+        document.getElementById('testBasic').addEventListener('click', () => {
+            log('✅ Teste básico de clique funcionando!');
+        });
+        
+        // Teste 2: Botão SCAN original
+        document.getElementById('testScanButton').addEventListener('click', () => {
+            const scanBtn = document.getElementById('scanButton');
+            if (scanBtn) {
+                log('✅ Botão SCAN encontrado!');
+                log(`Disabled: ${scanBtn.disabled}`);
+                log(`Display: ${getComputedStyle(scanBtn).display}`);
+                log(`Visibility: ${getComputedStyle(scanBtn).visibility}`);
+                
+                // Tentar clicar
+                try {
+                    scanBtn.click();
+                    log('✅ Clique no botão SCAN executado');
+                } catch (error) {
+                    log(`❌ Erro ao clicar: ${error.message}`);
+                }
+            } else {
+                log('❌ Botão SCAN não encontrado!');
+            }
+        });
+        
+        // Teste 3: LotteryScanner
+        document.getElementById('testLotteryScanner').addEventListener('click', () => {
+            if (window.lotteryScanner) {
+                log('✅ window.lotteryScanner encontrado!');
+                log(`Tipo: ${typeof window.lotteryScanner}`);
+                log(`startScan: ${typeof window.lotteryScanner.startScan}`);
+                
+                if (typeof window.lotteryScanner.startScan === 'function') {
+                    try {
+                        log('🚀 Chamando startScan()...');
+                        window.lotteryScanner.startScan();
+                        log('✅ startScan() executado com sucesso!');
+                    } catch (error) {
+                        log(`❌ Erro em startScan(): ${error.message}`);
+                        log(`Stack: ${error.stack}`);
+                    }
+                } else {
+                    log('❌ startScan não é uma função');
+                }
+            } else {
+                log('❌ window.lotteryScanner não encontrado!');
+            }
+        });
+        
+        // Teste 4: Criar nova instância
+        document.getElementById('testCreateInstance').addEventListener('click', () => {
+            if (typeof LotteryScanner !== 'undefined') {
+                log('✅ Classe LotteryScanner encontrada!');
+                try {
+                    log('🔧 Criando nova instância...');
+                    const newInstance = new LotteryScanner();
+                    log('✅ Nova instância criada com sucesso!');
+                    
+                    // Testar startScan da nova instância
+                    if (typeof newInstance.startScan === 'function') {
+                        log('🚀 Testando startScan da nova instância...');
+                        newInstance.startScan();
+                        log('✅ startScan da nova instância funcionou!');
+                    }
+                } catch (error) {
+                    log(`❌ Erro ao criar instância: ${error.message}`);
+                    log(`Stack: ${error.stack}`);
+                }
+            } else {
+                log('❌ Classe LotteryScanner não encontrada!');
+            }
+        });
+        
+        // Limpar log
+        document.getElementById('clearLog').addEventListener('click', clearLog);
+        
+        // Log inicial
+        log('🔍 Teste simples carregado!');
+        log('Aguardando interação do usuário...');
+        
+        // Verificar se o script principal foi carregado
+        setTimeout(() => {
+            log('--- Verificação após 2 segundos ---');
+            log(`LotteryScanner class: ${typeof LotteryScanner}`);
+            log(`window.lotteryScanner: ${typeof window.lotteryScanner}`);
+            
+            const scanBtn = document.getElementById('scanButton');
+            log(`scanButton element: ${scanBtn ? 'encontrado' : 'não encontrado'}`);
+        }, 2000);
+    </script>
+    
+    <!-- Carregar o script principal -->
+    <script src="lottery-scanner-v2.js"></script>
+</body>
+</html>
