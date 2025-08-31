@@ -18,6 +18,12 @@ class LotteryScanner {
         this.loadingSpinner = document.getElementById('loadingSpinner');
         this.imageInput = document.getElementById('imageInput');
         
+        // Modal de captura
+        this.captureModal = document.getElementById('captureModal');
+        this.fileOptionBtn = document.getElementById('fileOption');
+        this.cameraOptionBtn = document.getElementById('cameraOption');
+        this.cancelCaptureBtn = document.getElementById('cancelCaptureBtn');
+        
         // Modal de números
         this.numbersModal = document.getElementById('numbersModal');
         this.numberInputs = document.querySelectorAll('.number-input');
@@ -39,6 +45,11 @@ class LotteryScanner {
         // Evento de mudança no input de imagem
         this.imageInput.addEventListener('change', (e) => this.handleImageSelect(e));
         
+        // Eventos do modal de captura
+        this.fileOptionBtn.addEventListener('click', () => this.selectFileCapture());
+        this.cameraOptionBtn.addEventListener('click', () => this.selectCameraCapture());
+        this.cancelCaptureBtn.addEventListener('click', () => this.closeCaptureModal());
+        
         // Eventos do modal de números
         this.checkNumbersBtn.addEventListener('click', () => this.checkNumbers());
         this.cancelBtn.addEventListener('click', () => this.closeNumbersModal());
@@ -47,6 +58,12 @@ class LotteryScanner {
         this.finishBtn.addEventListener('click', () => this.finish());
         
         // Fechar modal clicando fora
+        this.captureModal.addEventListener('click', (e) => {
+            if (e.target === this.captureModal) {
+                this.closeCaptureModal();
+            }
+        });
+        
         this.numbersModal.addEventListener('click', (e) => {
             if (e.target === this.numbersModal) {
                 this.closeNumbersModal();
@@ -68,11 +85,40 @@ class LotteryScanner {
     }
 
     startScan() {
+        console.log('🔍 startScan() chamado - sempre mostrando modal de captura');
+        this.showCaptureModal();
+    }
+
+    showCaptureModal() {
+        console.log('📱 Exibindo modal de captura');
+        const captureModal = document.getElementById('captureModal');
+        if (captureModal) {
+            captureModal.style.display = 'flex';
+            console.log('✅ Modal de captura exibido');
+        } else {
+            console.error('❌ Modal de captura não encontrado');
+        }
+    }
+
+    closeCaptureModal() {
+        const captureModal = document.getElementById('captureModal');
+        captureModal.style.display = 'none';
+    }
+
+    selectFileCapture() {
+        this.closeCaptureModal();
         this.showLoading();
         // Simular um pequeno delay para mostrar o loading
         setTimeout(() => {
             this.imageInput.click();
         }, 500);
+    }
+
+    selectCameraCapture() {
+        this.closeCaptureModal();
+        // Por enquanto, usar a mesma funcionalidade de arquivo
+        // Futuramente pode ser implementada a captura da câmera
+        this.selectFileCapture();
     }
 
     showLoading() {

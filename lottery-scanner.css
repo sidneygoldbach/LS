@@ -290,6 +290,102 @@ header p {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+/* Estilos do modal de captura */
+.capture-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.capture-option-btn {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.capture-option-btn:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.option-icon {
+    font-size: 2.5em;
+    margin-right: 20px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.option-text h3 {
+    color: #333;
+    font-size: 1.3em;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.option-text p {
+    color: #666;
+    font-size: 0.95em;
+    margin: 0;
+}
+
+/* Estilos do modal de captura */
+.capture-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.capture-option-btn {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.capture-option-btn:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.option-icon {
+    font-size: 2.5em;
+    margin-right: 20px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.option-text h3 {
+    color: #333;
+    font-size: 1.3em;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.option-text p {
+    color: #666;
+    font-size: 0.95em;
+    margin: 0;
+}
+
 /* Resultados */
 #resultsContent {
     background: #f8f9fa;

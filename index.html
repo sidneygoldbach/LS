@@ -53,8 +53,32 @@
             </div>
             
             <!-- Input oculto para captura de imagem -->
-            <input type="file" id="imageInput" accept="image/*" capture="environment" style="display: none;">
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
         </main>
+        
+        <!-- Modal de escolha de método de captura -->
+        <div id="captureModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Como deseja capturar a imagem?</h2>
+                <div class="capture-options">
+                    <button id="fileOption" class="capture-option-btn">
+                        <div class="option-icon">📁</div>
+                        <div class="option-text">
+                            <h3>Carregar Arquivo</h3>
+                            <p>Selecione uma imagem da galeria</p>
+                        </div>
+                    </button>
+                    <button id="cameraOption" class="capture-option-btn">
+                        <div class="option-icon">📷</div>
+                        <div class="option-text">
+                            <h3>Usar Câmera</h3>
+                            <p>Tire uma foto agora</p>
+                        </div>
+                    </button>
+                </div>
+                <button id="cancelCaptureBtn" class="cancel-btn">Cancelar</button>
+            </div>
+        </div>
         
         <!-- Modal para edição de números -->
         <div id="numbersModal" class="modal hidden">
