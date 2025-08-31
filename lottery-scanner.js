@@ -365,14 +365,25 @@ class LotteryScanner {
 
     async performOCR(file) {
         try {
-            // Usar Tesseract.js para OCR
-            const { data: { text } } = await Tesseract.recognize(
-                file,
-                'eng',
-                {
-                    logger: m => console.log(m)
-                }
-            );
+            let text = '';
+            
+            // Sistema Multi-OCR API baseado na configuração
+            if (window.CONFIG && window.CONFIG.OCR_API_NAME === "Google_Cloud_Vision_API") {
+                // Usar Google Cloud Vision API
+                console.log('🔍 Usando Google Cloud Vision API para OCR...');
+                text = await this.performGoogleCloudVisionOCR(file);
+            } else {
+                // Usar Tesseract.js (API atual)
+                console.log('🔍 Usando Tesseract.js para OCR...');
+                const { data: { text: tesseractText } } = await Tesseract.recognize(
+                    file,
+                    window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.language : 'eng',
+                    {
+                        logger: window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.logger : (m => console.log(m))
+                    }
+                );
+                text = tesseractText;
+            }
 
             console.log('Texto reconhecido:', text);
             
@@ -383,6 +394,68 @@ class LotteryScanner {
             // Retornar números de exemplo para demonstração
             return this.generateSampleNumbers();
         }
+    }
+
+    async performGoogleCloudVisionOCR(file) {
+        try {
+            // Verificar se a API Key está configurada
+            if (!window.CONFIG.GOOGLE_CLOUD_CONFIG.apiKey) {
+                throw new Error('API Key do Google Cloud Vision não configurada');
+            }
+
+            // Converter arquivo para base64
+            const base64Image = await this.fileToBase64(file);
+            
+            // Preparar requisição para Google Cloud Vision API
+            const requestBody = {
+                requests: [{
+                    image: {
+                        content: base64Image.split(',')[1] // Remover prefixo data:image/...
+                    },
+                    features: window.CONFIG.GOOGLE_CLOUD_CONFIG.features
+                }]
+            };
+
+            // Fazer requisição para Google Cloud Vision API
+            const response = await fetch(
+                `${window.CONFIG.GOOGLE_CLOUD_CONFIG.endpoint}?key=${window.CONFIG.GOOGLE_CLOUD_CONFIG.apiKey}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Google Cloud Vision API erro: ${response.status} ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            
+            // Extrair texto da resposta
+            if (result.responses && result.responses[0] && result.responses[0].textAnnotations) {
+                const detectedText = result.responses[0].textAnnotations[0].description;
+                console.log('✅ Google Cloud Vision API - Texto detectado:', detectedText);
+                return detectedText;
+            } else {
+                console.warn('⚠️ Google Cloud Vision API - Nenhum texto detectado');
+                return '';
+            }
+        } catch (error) {
+            console.error('❌ Erro na Google Cloud Vision API:', error);
+            throw error;
+        }
+    }
+
+    async fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     }
 
     extractNumbersAlternative(line, lineIndex, rowLetter) {
