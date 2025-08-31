@@ -17,11 +17,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA Manifest (desabilitado para evitar popup de instalação) -->
+    <!-- <link rel="manifest" href="manifest.json"> -->
     
     <!-- Favicon e ícones -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzY2N2VlYSIvPgo8cmVjdCB4PSI2IiB5PSIxMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjEyIiByeD0iMiIgZmlsbD0iIzRBOTBFMiIvPgo8Y2lyY2xlIGN4PSIyNCIgY3k9IjE2IiByPSIxIiBmaWxsPSIjRkY2QjZCIi8+Cjwvc3ZnPgo=">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzY2N2VlYSIvPgo8cmVjdCB4PSI2IiB5PSIxMCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjEyIiByeD0iMiIgZmlsbD0iIzRBOTBFMiIvPgo8Y2lyY2xlIGN4PSIyNCIgY3k9IjE2IiByPSIxIiBmaWxsPSIjRkY2QjZCIi8+Cjwvdmc+Cg==">
     
     <link rel="stylesheet" href="lottery-scanner.css">
 </head>
@@ -50,6 +50,8 @@
                     <span id="scanText">SCAN</span>
                     <div id="loadingSpinner" class="spinner hidden"></div>
                 </button>
+                
+
             </div>
             
             <!-- Input oculto para captura de imagem -->
@@ -86,25 +88,7 @@
                 <h2>Números Escaneados</h2>
                 <p>Verifique e edite os números se necessário:</p>
                 
-                <div class="numbers-grid">
-                    <div class="number-section">
-                        <label>Números Principais (5):</label>
-                        <div class="main-numbers">
-                            <input type="number" class="number-input" min="1" max="69" placeholder="00">
-                            <input type="number" class="number-input" min="1" max="69" placeholder="00">
-                            <input type="number" class="number-input" min="1" max="69" placeholder="00">
-                            <input type="number" class="number-input" min="1" max="69" placeholder="00">
-                            <input type="number" class="number-input" min="1" max="69" placeholder="00">
-                        </div>
-                    </div>
-                    
-                    <div class="number-section">
-                        <label>Powerball:</label>
-                        <div class="powerball-number">
-                            <input type="number" class="powerball-input" min="1" max="26" placeholder="00">
-                        </div>
-                    </div>
-                </div>
+                <!-- Seção de números principais removida - agora só mostra as 5 fileiras detectadas -->
                 
                 <div class="state-section">
                     <label for="stateSelect">Estado:</label>
@@ -177,8 +161,57 @@
         </div>
     </div>
     
-    <!-- Tesseract.js para OCR -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
-    <script src="lottery-scanner.js"></script>
+    <!-- Carregar script principal diretamente -->
+    <script src="lottery-scanner-v2.js"></script>
+    <script>
+        console.log('🚀 Iniciando Lottery Scanner...');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('✅ DOM carregado');
+            
+            // Aguardar um pouco para garantir que tudo foi processado
+            setTimeout(() => {
+                console.log('🧪 Verificando instância do LotteryScanner...');
+                if (window.lotteryScanner) {
+                    console.log('✅ window.lotteryScanner disponível:', window.lotteryScanner);
+                    
+                    // Testar o botão SCAN
+                    const scanBtn = document.getElementById('scanButton');
+                    if (scanBtn) {
+                        console.log('✅ Botão SCAN encontrado:', scanBtn);
+                        console.log('🧪 Testando clique no botão SCAN...');
+                        
+                        // Adicionar um listener de teste
+                        scanBtn.addEventListener('click', () => {
+                            console.log('🎯 TESTE: Clique detectado no botão SCAN original!');
+                        });
+                        
+                        // Simular clique para teste
+                        setTimeout(() => {
+                            console.log('🧪 Simulando clique...');
+                            scanBtn.click();
+                        }, 1000);
+                    } else {
+                        console.error('❌ Botão SCAN não encontrado!');
+                    }
+                } else {
+                    console.error('❌ window.lotteryScanner não foi criado');
+                    
+                    // Tentar novamente após mais tempo
+                    setTimeout(() => {
+                        if (window.lotteryScanner) {
+                            console.log('✅ window.lotteryScanner criado após segunda tentativa');
+                        } else {
+                            console.error('❌ window.lotteryScanner ainda não foi criado após segunda tentativa');
+                        }
+                    }, 1000);
+                }
+            }, 500);
+        });
+    </script>
+    <!-- Bibliotecas OCR necessárias -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" type="text/javascript"></script>
+    <script src="test-script.js"></script>
 </body>
 </html>

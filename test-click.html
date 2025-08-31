@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Clique</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            display: block;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        #log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Clique Básico</h1>
+    
+    <button id="testBtn1" class="test-btn">Teste 1: Alert Simples</button>
+    <button id="testBtn2" class="test-btn">Teste 2: Console Log</button>
+    <button id="testBtn3" class="test-btn">Teste 3: Modificar DOM</button>
+    <button id="scanButton" class="test-btn">📷 SCAN (Botão Original)</button>
+    
+    <div id="log">🚀 Iniciando testes...
+</div>
+    
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}
+`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        addLog('✅ Script carregado');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('✅ DOM carregado');
+            
+            // Teste 1: Alert simples
+            const btn1 = document.getElementById('testBtn1');
+            if (btn1) {
+                btn1.addEventListener('click', () => {
+                    addLog('🎯 Teste 1: Clique detectado!');
+                    alert('Teste 1: Funcionou!');
+                });
+                addLog('✅ Teste 1: Event listener anexado');
+            } else {
+                addLog('❌ Teste 1: Botão não encontrado');
+            }
+            
+            // Teste 2: Console log
+            const btn2 = document.getElementById('testBtn2');
+            if (btn2) {
+                btn2.addEventListener('click', () => {
+                    addLog('🎯 Teste 2: Clique detectado!');
+                    console.log('Teste 2: Console log funcionando!');
+                });
+                addLog('✅ Teste 2: Event listener anexado');
+            } else {
+                addLog('❌ Teste 2: Botão não encontrado');
+            }
+            
+            // Teste 3: Modificar DOM
+            const btn3 = document.getElementById('testBtn3');
+            if (btn3) {
+                btn3.addEventListener('click', () => {
+                    addLog('🎯 Teste 3: Clique detectado!');
+                    btn3.textContent = '✅ DOM Modificado!';
+                    btn3.style.background = '#28a745';
+                });
+                addLog('✅ Teste 3: Event listener anexado');
+            } else {
+                addLog('❌ Teste 3: Botão não encontrado');
+            }
+            
+            // Teste do botão SCAN original
+            const scanBtn = document.getElementById('scanButton');
+            if (scanBtn) {
+                scanBtn.addEventListener('click', () => {
+                    addLog('🎯 SCAN: Clique detectado!');
+                    alert('Botão SCAN funcionando!');
+                });
+                addLog('✅ SCAN: Event listener anexado');
+            } else {
+                addLog('❌ SCAN: Botão não encontrado');
+            }
+            
+            addLog('🏁 Todos os testes configurados');
+        });
+        
+        // Teste adicional: verificar se há conflitos
+        window.addEventListener('click', (e) => {
+            addLog(`🖱️ Clique global detectado em: ${e.target.tagName}#${e.target.id}`);
+        });
+        
+        addLog('🔧 Script configurado completamente');
+    </script>
+</body>
+</html>

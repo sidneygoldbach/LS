@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal - Lottery Scanner</title>
+    <link rel="stylesheet" href="lottery-scanner.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Teste do Modal Desktop</h1>
+        
+        <div class="scan-section">
+            <button id="scanButton" class="scan-btn">
+                <span id="scanText">SCAN</span>
+                <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+            </button>
+        </div>
+        
+        <div id="log" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; font-family: monospace; white-space: pre-wrap;"></div>
+    </div>
+    
+    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+    
+    <script src="lottery-scanner-v2.js"></script>
+    
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 DOM carregado');
+            
+            // Aguardar um pouco para garantir que o script foi carregado
+            setTimeout(() => {
+                log('🔍 Verificando window.lotteryScanner...');
+                
+                if (window.lotteryScanner) {
+                    log('✅ window.lotteryScanner encontrado!');
+                    log('📋 Tipo: ' + typeof window.lotteryScanner);
+                    log('🔧 Métodos disponíveis: ' + Object.getOwnPropertyNames(Object.getPrototypeOf(window.lotteryScanner)).join(', '));
+                    
+                    // Testar se o botão está funcionando
+                    const scanButton = document.getElementById('scanButton');
+                    if (scanButton) {
+                        log('✅ Botão SCAN encontrado!');
+                        
+                        // Adicionar listener de teste
+                        scanButton.addEventListener('click', () => {
+                            log('🖱️ Clique no botão detectado!');
+                            log('🔍 Chamando startScan()...');
+                            
+                            try {
+                                window.lotteryScanner.startScan();
+                                log('✅ startScan() chamado com sucesso!');
+                            } catch (error) {
+                                log('❌ Erro ao chamar startScan(): ' + error.message);
+                                log('📋 Stack trace: ' + error.stack);
+                            }
+                        });
+                        
+                        log('✅ Event listener adicionado ao botão!');
+                    } else {
+                        log('❌ Botão SCAN não encontrado!');
+                    }
+                } else {
+                    log('❌ window.lotteryScanner NÃO encontrado!');
+                    log('🔍 Tentando criar nova instância...');
+                    
+                    try {
+                        window.lotteryScanner = new LotteryScanner();
+                        log('✅ Nova instância criada com sucesso!');
+                    } catch (error) {
+                        log('❌ Erro ao criar instância: ' + error.message);
+                    }
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
