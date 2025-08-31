@@ -30,6 +30,21 @@ class LotteryScanner {
         this.checkNumbersBtn = document.getElementById('checkNumbersBtn');
         this.cancelBtn = document.getElementById('cancelBtn');
         
+        // Inputs de números (inicializar como array vazio para evitar erro forEach)
+        this.numberInputs = [];
+        this.powerballInput = null;
+        
+        // Tentar encontrar os inputs existentes
+        const existingNumberInputs = document.querySelectorAll('.number-input');
+        if (existingNumberInputs.length > 0) {
+            this.numberInputs = Array.from(existingNumberInputs);
+        }
+        
+        const existingPowerballInput = document.querySelector('.powerball-input');
+        if (existingPowerballInput) {
+            this.powerballInput = existingPowerballInput;
+        }
+        
         // Modal de resultados
         this.resultsModal = document.getElementById('resultsModal');
         this.resultsContent = document.getElementById('resultsContent');
@@ -141,20 +156,22 @@ class LotteryScanner {
     }
 
     selectFileCapture() {
-        this.closeCaptureModal();
-        this.showLoading();
+        console.log('📁 selectFileCapture() chamado');
         
-        // Detectar se é dispositivo móvel
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                        ('ontouchstart' in window) || 
-                        (navigator.maxTouchPoints > 0);
+        // Verificar se o elemento imageInput existe
+        if (!this.imageInput) {
+            console.error('❌ Elemento imageInput não encontrado');
+            return;
+        }
         
-        if (isMobile) {
-            // No mobile, tentar usar a câmera diretamente
-            this.tryCamera();
-        } else {
-            // No desktop, mostrar opções
-            this.showDesktopOptions();
+        console.log('✅ Elemento imageInput encontrado, acionando clique...');
+        
+        // Acionar o clique diretamente no input de arquivo
+        try {
+            this.imageInput.click();
+            console.log('✅ Clique no input de arquivo executado');
+        } catch (error) {
+            console.error('❌ Erro ao clicar no input de arquivo:', error);
         }
     }
     
@@ -231,7 +248,7 @@ class LotteryScanner {
     async startCameraCapture() {
         try {
             this.showLoading();
-            this.scanText.textContent = 'Acessando câmera...';
+            console.log('📷 Acessando câmera...');
             
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: 'environment' } 
@@ -302,23 +319,18 @@ class LotteryScanner {
     }
 
     selectCameraCapture() {
-        this.closeCaptureModal();
-        // Por enquanto, usar a mesma funcionalidade de arquivo
-        // Futuramente pode ser implementada a captura da câmera
-        this.selectFileCapture();
+        console.log('📷 selectCameraCapture() chamado');
+        this.startCameraCapture();
     }
 
     showLoading() {
-        this.scanText.classList.add('hidden');
-        this.loadingSpinner.classList.remove('hidden');
-        this.scanButton.disabled = true;
+        // Função mantida para compatibilidade, mas não há mais elementos de loading na tela principal
+        console.log('⏳ Modo loading ativado');
     }
 
     hideLoading() {
-        this.scanText.classList.remove('hidden');
-        this.loadingSpinner.classList.add('hidden');
-        this.scanButton.disabled = false;
-        this.scanText.textContent = 'SCAN';
+        // Função mantida para compatibilidade, mas não há mais elementos de loading na tela principal
+        console.log('✅ Modo loading desativado');
     }
 
     async handleImageSelect(event) {
@@ -329,7 +341,7 @@ class LotteryScanner {
         }
 
         try {
-            this.scanText.textContent = 'Processando...';
+            console.log('🔄 Processando imagem...');
             
             // Processar OCR
             const numbers = await this.performOCR(file);
@@ -1220,39 +1232,51 @@ class LotteryScanner {
         // Verificar se é o formato antigo (compatibilidade)
         if (numbers.main && numbers.powerball && !numbers.rows) {
             // Preencher números principais
-            this.numberInputs.forEach((input, index) => {
-                if (numbers.main[index]) {
-                    input.value = numbers.main[index];
-                }
-            });
+            if (Array.isArray(this.numberInputs)) {
+                this.numberInputs.forEach((input, index) => {
+                    if (numbers.main[index]) {
+                        input.value = numbers.main[index];
+                    }
+                });
+            }
             
             // Preencher powerball
-            if (numbers.powerball) {
+            if (numbers.powerball && this.powerballInput) {
                 this.powerballInput.value = numbers.powerball;
             }
         } else if (numbers.rows && numbers.rows.length > 0) {
             // Se há múltiplas fileiras, usar a primeira para os inputs mas mostrar todas
             const firstRow = numbers.rows[0];
-            this.numberInputs.forEach((input, index) => {
-                if (firstRow.main[index]) {
-                    input.value = firstRow.main[index];
-                }
-            });
+            if (Array.isArray(this.numberInputs)) {
+                this.numberInputs.forEach((input, index) => {
+                    if (firstRow.main[index]) {
+                        input.value = firstRow.main[index];
+                    }
+                });
+            }
             
-            if (firstRow.powerball) {
+            if (firstRow.powerball && this.powerballInput) {
                 this.powerballInput.value = firstRow.powerball;
             }
             
             // Log para debug
             console.log(`Preenchendo modal com ${numbers.rows.length} fileiras detectadas`);
-            numbers.rows.forEach((row, index) => {
-                const letter = row.letter || String.fromCharCode(65 + index);
-                console.log(`Fileira ${letter}: ${row.main.join(', ')} | PB: ${row.powerball}`);
-            });
+            if (Array.isArray(numbers.rows)) {
+                numbers.rows.forEach((row, index) => {
+                    const letter = row.letter || String.fromCharCode(65 + index);
+                    console.log(`Fileira ${letter}: ${row.main.join(', ')} | PB: ${row.powerball}`);
+                });
+            }
         }
     }
 
     showNumbersModal(numbers) {
+        // Verificar se numbers é um objeto válido
+        if (!numbers || typeof numbers !== 'object') {
+            console.error('Erro: numbers não é um objeto válido:', numbers);
+            return;
+        }
+        
         // Verificar se é o formato antigo (compatibilidade)
         if (numbers && numbers.main && numbers.powerball && !numbers.rows) {
             numbers = {
@@ -1262,6 +1286,12 @@ class LotteryScanner {
                 }],
                 totalRows: 1
             };
+        }
+        
+        // Verificar se numbers.rows é um array válido
+        if (!Array.isArray(numbers.rows)) {
+            console.error('Erro: numbers.rows não é um array válido:', numbers.rows);
+            return;
         }
         
         // Sempre criar display para as fileiras (mesmo que seja apenas uma)
@@ -1274,6 +1304,18 @@ class LotteryScanner {
     }
     
     displayMultipleRows(numbers) {
+        // Verificar se numbers é um objeto válido
+        if (!numbers || typeof numbers !== 'object') {
+            console.error('Erro: numbers não é um objeto válido em displayMultipleRows:', numbers);
+            return;
+        }
+        
+        // Verificar se numbers.rows é um array válido
+        if (!Array.isArray(numbers.rows)) {
+            console.error('Erro: numbers.rows não é um array válido em displayMultipleRows:', numbers.rows);
+            return;
+        }
+        
         // Criar um elemento para mostrar as fileiras detectadas
         let existingDisplay = document.getElementById('detectedRowsDisplay');
         if (!existingDisplay) {
@@ -1318,6 +1360,18 @@ class LotteryScanner {
         
         numbers.rows.forEach((row, index) => {
             const rowLetter = row.letter || String.fromCharCode(65 + index); // A, B, C, D, E
+            
+            // Verificar se row.main é um array válido
+            if (!Array.isArray(row.main)) {
+                console.error('Erro: row.main não é um array:', row.main);
+                return; // Pular esta fileira
+            }
+            
+            // Verificar se row.powerball é um número válido
+            if (typeof row.powerball !== 'number' || isNaN(row.powerball)) {
+                console.error('Erro: row.powerball não é um número válido:', row.powerball);
+                return; // Pular esta fileira
+            }
             
             html += `
                 <div class="ticket-row" data-row="${index + 1}">
@@ -1632,16 +1686,29 @@ class LotteryScanner {
         this.closeResultsModal();
         // Limpar dados
         this.scannedNumbers = { main: [], powerball: null };
-        this.numberInputs.forEach(input => {
-            input.value = '';
-            input.style.borderColor = '#ddd';
-        });
-        this.powerballInput.value = '';
-        this.powerballInput.style.borderColor = '#FF6B6B';
-        this.stateSelect.value = '';
+        
+        // Limpar inputs de números com verificação de segurança
+        if (Array.isArray(this.numberInputs)) {
+            this.numberInputs.forEach(input => {
+                input.value = '';
+                input.style.borderColor = '#ddd';
+            });
+        }
+        
+        // Limpar powerball input com verificação de segurança
+        if (this.powerballInput) {
+            this.powerballInput.value = '';
+            this.powerballInput.style.borderColor = '#FF6B6B';
+        }
+        
+        if (this.stateSelect) {
+            this.stateSelect.value = '';
+        }
         
         // Reset do input de arquivo
-        this.imageInput.value = '';
+        if (this.imageInput) {
+            this.imageInput.value = '';
+        }
     }
 
     showError(message) {
@@ -1655,7 +1722,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         try {
             console.log('Initializing LotteryScanner...');
-            new LotteryScanner();
+            window.lotteryScanner = new LotteryScanner();
             console.log('LotteryScanner initialized successfully');
         } catch (error) {
             console.error('Error initializing LotteryScanner:', error);

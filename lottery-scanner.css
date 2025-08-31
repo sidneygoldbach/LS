@@ -55,44 +55,73 @@ header p {
     transform: scale(1.05);
 }
 
-/* Botão de scan */
-.scan-section {
+/* Seção de captura integrada */
+.capture-section {
     margin: 40px 0;
 }
 
-.scan-btn {
-    background: linear-gradient(45deg, #FF6B6B, #FF8E53);
-    border: none;
-    border-radius: 50px;
+.capture-section h3 {
+    color: #333;
+    font-size: 1.4em;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.capture-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.capture-option-btn {
+    padding: 18px 25px;
+    border: 2px solid #4A90E2;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4A90E2, #357ABD);
     color: white;
-    font-size: 1.5em;
-    font-weight: bold;
-    padding: 20px 60px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
-    position: relative;
-    overflow: hidden;
-    min-width: 200px;
-    min-height: 70px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 15px;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.2);
 }
 
-.scan-btn:hover {
+.capture-option-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 25px rgba(255, 107, 107, 0.4);
+    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.3);
+    background: linear-gradient(135deg, #357ABD, #2E6BA8);
 }
 
-.scan-btn:active {
+.capture-option-btn:active {
     transform: translateY(0);
 }
 
-.scan-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
+.capture-option-btn .icon {
+    font-size: 24px;
+    min-width: 30px;
+}
+
+.capture-option-btn .text {
+    flex: 1;
+}
+
+.capture-option-btn .text .title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.capture-option-btn .text .subtitle {
+    font-size: 13px;
+    opacity: 0.8;
+    font-weight: 400;
 }
 
 /* Spinner de loading */
