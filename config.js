@@ -15,6 +15,10 @@ const GOOGLE_CLOUD_CONFIG = {
     features: [
         {
             type: "DOCUMENT_TEXT_DETECTION",
+            maxResults: 100
+        },
+        {
+            type: "TEXT_DETECTION",
             maxResults: 50
         }
     ],
@@ -22,7 +26,13 @@ const GOOGLE_CLOUD_CONFIG = {
     imageContext: {
         languageHints: ["en"],
         textDetectionParams: {
-            enableTextDetectionConfidenceScore: true
+            enableTextDetectionConfidenceScore: true,
+            advancedOcrOptions: [
+                "LEGACY_LAYOUT"
+            ]
+        },
+        cropHintsParams: {
+            aspectRatios: [0.8, 1.0, 1.2]
         }
     }
 };

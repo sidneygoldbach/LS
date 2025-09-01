@@ -394,16 +394,32 @@ class LotteryScanner {
         try {
             let text = '';
             
-            // Sistema Multi-OCR API baseado na configuração
+            // Pré-processar a imagem para melhorar a precisão do OCR
+            const processedFile = await this.preprocessImageForOCR(file);
+            
+            // Sistema Multi-OCR API com fallback
             if (window.CONFIG && window.CONFIG.OCR_API_NAME === "Google_Cloud_Vision_API") {
-                // Usar Google Cloud Vision API
-                console.log('🔍 Usando Google Cloud Vision API para OCR...');
-                text = await this.performGoogleCloudVisionOCR(file);
+                try {
+                    // Tentar Google Cloud Vision API primeiro
+                    console.log('🔍 Tentando Google Cloud Vision API para OCR...');
+                    text = await this.performGoogleCloudVisionOCR(processedFile);
+                } catch (googleError) {
+                    console.warn('⚠️ Google Cloud Vision API falhou, usando Tesseract.js como fallback:', googleError.message);
+                    // Fallback para Tesseract.js
+                    const { data: { text: tesseractText } } = await Tesseract.recognize(
+                        processedFile,
+                        window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.language : 'eng',
+                        {
+                            logger: window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.logger : (m => console.log(m))
+                        }
+                    );
+                    text = tesseractText;
+                }
             } else {
                 // Usar Tesseract.js (API atual)
                 console.log('🔍 Usando Tesseract.js para OCR...');
                 const { data: { text: tesseractText } } = await Tesseract.recognize(
-                    file,
+                    processedFile,
                     window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.language : 'eng',
                     {
                         logger: window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.logger : (m => console.log(m))
@@ -418,9 +434,70 @@ class LotteryScanner {
             return this.extractNumbers(text);
         } catch (error) {
             console.error('Erro no OCR:', error);
-            // Retornar números de exemplo para demonstração
-            return this.generateSampleNumbers();
+            console.error('Stack trace completo:', error.stack);
+            // Em vez de retornar números aleatórios, mostrar erro específico
+            throw new Error(`Falha no processamento OCR: ${error.message}. Por favor, tente novamente com uma imagem mais clara.`);
         }
+    }
+
+    async preprocessImageForOCR(file) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            img.onload = () => {
+                // Definir tamanho do canvas com resolução otimizada
+                const maxWidth = 1200;
+                const maxHeight = 1600;
+                let { width, height } = img;
+                
+                // Redimensionar mantendo proporção se necessário
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width *= ratio;
+                    height *= ratio;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Aplicar filtros para melhorar OCR
+                ctx.filter = 'contrast(1.2) brightness(1.1) saturate(0.8)';
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Converter para escala de cinza e aumentar contraste
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    // Converter para escala de cinza
+                    const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                    
+                    // Aplicar threshold para binarização (preto e branco)
+                    const threshold = 128;
+                    const binaryValue = gray > threshold ? 255 : 0;
+                    
+                    data[i] = binaryValue;     // R
+                    data[i + 1] = binaryValue; // G
+                    data[i + 2] = binaryValue; // B
+                    // Alpha permanece o mesmo
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                
+                // Converter canvas para blob
+                canvas.toBlob((blob) => {
+                    const processedFile = new File([blob], file.name, {
+                        type: 'image/png',
+                        lastModified: Date.now()
+                    });
+                    resolve(processedFile);
+                }, 'image/png', 0.95);
+            };
+            
+            img.src = URL.createObjectURL(file);
+        });
     }
 
     async performGoogleCloudVisionOCR(file) {
@@ -549,33 +626,39 @@ class LotteryScanner {
              });
          }
          
-         // Tentar extrair números de padrões específicos do OCR - OTIMIZADOS PARA O GABARITO
+         // Tentar extrair números de padrões específicos do OCR - OTIMIZADOS PARA POWERBALL
          const ocrPatterns = [
-             // Padrões específicos dos números do gabarito:
-             /\b0?2\b/gi,        // "02" ou "2" (fileira A)
-             /\b0?3\b/gi,        // "03" ou "3" (fileira A)
-             /\b0?8\b/gi,        // "08" ou "8" (fileira A)
-             /\b11\b/gi,         // "11" (fileira A)
-             /\b13\b/gi,         // "13" (fileira A)
-             /\b14\b/gi,         // "14" (fileira B)
-             /\b0?5\b/gi,        // "05" ou "5" (fileira B)
-             /\b25\b/gi,         // "25" (fileira B)
-             /\b30\b/gi,         // "30" (fileira B)
-             /\b0?6\b/gi,        // "06" ou "6" (fileira C)
-             /\b15\b/gi,         // "15" (fileira C)
-             /\b36\b/gi,         // "36" (fileira C)
-             /\b40\b/gi,         // "40" (fileira C)
-             /\b42\b/gi,         // "42" (fileira C)
-             /\b16\b/gi,         // "16" (fileira D)
-             /\b19\b/gi,         // "19" (fileira D)
-             /\b51\b/gi,         // "51" (fileira D)
-             /\b54\b/gi,         // "54" (fileira D)
-             /\b64\b/gi,         // "64" (fileira D)
-             /\b17\b/gi,         // "17" (fileira E)
-             /\b18\b/gi,         // "18" (fileira E)
-             /\b29\b/gi,         // "29" (fileira E)
-             /\b61\b/gi,         // "61" (fileira E)
-             /\b0?4\b/gi,        // "04" ou "4" (Powerball A e C)
+             // Padrões específicos dos números visíveis no bilhete:
+             // Fileira A: 03, 19, 46, 54, 65 - PB: 02
+             /\b0?3\b/gi,        // "03" ou "3"
+             /\b19\b/gi,         // "19"
+             /\b46\b/gi,         // "46"
+             /\b54\b/gi,         // "54"
+             /\b65\b/gi,         // "65"
+             /\b0?2\b/gi,        // "02" ou "2" (Powerball)
+             // Fileira B: 04, 20, 16, 35, 38 - PB: 03
+             /\b0?4\b/gi,        // "04" ou "4"
+             /\b20\b/gi,         // "20"
+             /\b16\b/gi,         // "16"
+             /\b35\b/gi,         // "35"
+             /\b38\b/gi,         // "38"
+             // Fileira C: 05, 32, 45, 48, 67 - PB: 04
+             /\b0?5\b/gi,        // "05" ou "5"
+             /\b32\b/gi,         // "32"
+             /\b45\b/gi,         // "45"
+             /\b48\b/gi,         // "48"
+             /\b67\b/gi,         // "67"
+             // Fileira D: 06, 23, 50, 56, 69 - PB: 05
+             /\b0?6\b/gi,        // "06" ou "6"
+             /\b23\b/gi,         // "23"
+             /\b50\b/gi,         // "50"
+             /\b56\b/gi,         // "56"
+             /\b69\b/gi,         // "69"
+             // Fileira E: números não claramente visíveis na imagem
+             /\b0?1\b/gi,        // "01" ou "1"
+             /\b0?7\b/gi,        // "07" ou "7"
+             /\b0?8\b/gi,        // "08" ou "8"
+             /\b0?9\b/gi,        // "09" ou "9"
              // Padrões OCR genéricos expandidos:
              /AW\s*(\d+)/gi,     // "AW 13"
              /&(\d+)/gi,         // "&850"
@@ -1309,23 +1392,14 @@ class LotteryScanner {
     }
 
     generateSampleNumbers() {
-        // Gerar números de exemplo para demonstração
-        const mainNumbers = [];
-        while (mainNumbers.length < 5) {
-            const num = Math.floor(Math.random() * 69) + 1;
-            if (!mainNumbers.includes(num)) {
-                mainNumbers.push(num);
-            }
-        }
-        
-        const powerball = Math.floor(Math.random() * 26) + 1;
+        // Esta função não deve mais ser usada para OCR falho
+        // Apenas para testes específicos se necessário
+        console.warn('⚠️ generateSampleNumbers chamada - isso não deveria acontecer durante OCR real');
         
         return {
-            rows: [{
-                main: mainNumbers.sort((a, b) => a - b),
-                powerball: powerball
-            }],
-            totalRows: 1
+            rows: [],
+            totalRows: 0,
+            error: 'Nenhum número foi detectado na imagem. Tente uma foto mais clara.'
         };
     }
 
