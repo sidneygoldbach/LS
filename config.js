@@ -14,10 +14,17 @@ const GOOGLE_CLOUD_CONFIG = {
     endpoint: "https://vision.googleapis.com/v1/images:annotate",
     features: [
         {
-            type: "TEXT_DETECTION",
-            maxResults: 10
+            type: "DOCUMENT_TEXT_DETECTION",
+            maxResults: 50
         }
-    ]
+    ],
+    languageHints: ["en"],
+    imageContext: {
+        languageHints: ["en"],
+        textDetectionParams: {
+            enableTextDetectionConfidenceScore: true
+        }
+    }
 };
 
 // ===== CONFIGURAÇÕES TESSERACT =====

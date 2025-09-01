@@ -313,9 +313,36 @@ class LotteryScanner {
         
         // Converter para blob e processar
         canvas.toBlob((blob) => {
+            // Criar arquivo para processamento OCR
             const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+            
+            // Salvar imagem original automaticamente quando usar câmera
+            this.downloadOriginalImage(blob);
+            
+            // Processar a imagem com OCR
             this.handleImageSelect({ target: { files: [file] } });
         }, 'image/jpeg', 0.8);
+    }
+
+    downloadOriginalImage(blob) {
+        // Criar um link de download para a imagem original
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Gerar nome do arquivo com timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        link.download = `lottery-original-${timestamp}.jpg`;
+        
+        // Adicionar ao DOM temporariamente e clicar
+        document.body.appendChild(link);
+        link.click();
+        
+        // Limpar
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log('📸 Imagem original salva automaticamente');
     }
 
     selectCameraCapture() {
@@ -412,7 +439,8 @@ class LotteryScanner {
                     image: {
                         content: base64Image.split(',')[1] // Remover prefixo data:image/...
                     },
-                    features: window.CONFIG.GOOGLE_CLOUD_CONFIG.features
+                    features: window.CONFIG.GOOGLE_CLOUD_CONFIG.features,
+                    imageContext: window.CONFIG.GOOGLE_CLOUD_CONFIG.imageContext
                 }]
             };
 
