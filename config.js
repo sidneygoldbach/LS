@@ -5,12 +5,12 @@
 // Valores possíveis:
 // - "Tesseract" (API atual em uso)
 // - "Google_Cloud_Vision_API" (nova API a ser implementada)
-const OCR_API_NAME = "Google_Cloud_Vision_API";
+const OCR_API_NAME = "Tesseract";
 
 // ===== CONFIGURAÇÕES GOOGLE CLOUD VISION API =====
 // Configurações para quando OCR_API_NAME = "Google_Cloud_Vision_API"
 const GOOGLE_CLOUD_CONFIG = {
-    apiKey: "AIzaSyCZCh9lNtl1LV0AskSgcQtBxPQU84O9NSk", // API Key configurada
+    // API Key movida para o backend por segurança - não expor no frontend
     endpoint: "https://vision.googleapis.com/v1/images:annotate",
     features: [
         {

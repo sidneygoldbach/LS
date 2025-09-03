@@ -166,6 +166,9 @@ class LotteryScanner {
         
         console.log('✅ Elemento imageInput encontrado, acionando clique...');
         
+        // Fechar o modal de captura primeiro
+        this.closeCaptureModal();
+        
         // Acionar o clique diretamente no input de arquivo
         try {
             this.imageInput.click();
@@ -361,51 +364,73 @@ class LotteryScanner {
     }
 
     async handleImageSelect(event) {
+        console.log('📥 handleImageSelect() chamado');
+        
         const file = event.target.files[0];
         if (!file) {
+            console.log('❌ Nenhum arquivo selecionado');
             this.hideLoading();
             return;
         }
 
+        console.log('📁 Arquivo selecionado:', {
+            name: file.name,
+            size: file.size,
+            type: file.type
+        });
+
         try {
-            console.log('🔄 Processando imagem...');
+            console.log('🔄 Iniciando processamento da imagem...');
             
             // Processar OCR
+            console.log('🔍 Chamando performOCR...');
             const numbers = await this.performOCR(file);
+            console.log('✅ performOCR concluído. Resultado:', numbers);
             
             if (numbers) {
+                console.log('📊 Números detectados, populando modal...');
                 this.scannedNumbers = numbers;
                 this.populateNumbersModal(numbers);
                 this.showNumbersModal(numbers);
+                console.log('✅ Modal de números exibido');
             } else {
+                console.log('❌ Nenhum número detectado');
                 this.showError('Não foi possível reconhecer os números. Tente novamente.');
             }
         } catch (error) {
-            console.error('Erro no processamento:', error);
+            console.error('❌ Erro no processamento:', error);
             console.error('Stack trace:', error.stack);
             console.error('Mensagem do erro:', error.message);
             this.showError(`Erro ao processar a imagem: ${error.message}. Tente novamente.`);
         } finally {
+            console.log('🏁 Finalizando handleImageSelect');
             this.hideLoading();
         }
     }
 
     async performOCR(file) {
         try {
+            console.log('🚀 performOCR iniciado');
             let text = '';
             
             // Pré-processar a imagem para melhorar a precisão do OCR
+            console.log('🔧 Pré-processando imagem...');
             const processedFile = await this.preprocessImageForOCR(file);
+            console.log('✅ Pré-processamento concluído');
             
             // Sistema Multi-OCR API com fallback
+            console.log('🔍 Verificando configuração OCR:', window.CONFIG?.OCR_API_NAME);
+            
             if (window.CONFIG && window.CONFIG.OCR_API_NAME === "Google_Cloud_Vision_API") {
                 try {
                     // Tentar Google Cloud Vision API primeiro
                     console.log('🔍 Tentando Google Cloud Vision API para OCR...');
                     text = await this.performGoogleCloudVisionOCR(processedFile);
+                    console.log('✅ Google Cloud Vision API concluído');
                 } catch (googleError) {
                     console.warn('⚠️ Google Cloud Vision API falhou, usando Tesseract.js como fallback:', googleError.message);
                     // Fallback para Tesseract.js
+                    console.log('🔄 Iniciando fallback para Tesseract.js...');
                     const { data: { text: tesseractText } } = await Tesseract.recognize(
                         processedFile,
                         window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.language : 'eng',
@@ -414,6 +439,7 @@ class LotteryScanner {
                         }
                     );
                     text = tesseractText;
+                    console.log('✅ Tesseract.js fallback concluído');
                 }
             } else {
                 // Usar Tesseract.js (API atual)
@@ -426,14 +452,19 @@ class LotteryScanner {
                     }
                 );
                 text = tesseractText;
+                console.log('✅ Tesseract.js concluído');
             }
 
-            console.log('Texto reconhecido:', text);
+            console.log('📝 Texto reconhecido:', text?.substring(0, 200) + '...');
             
             // Extrair números do texto
-            return this.extractNumbers(text);
+            console.log('🔢 Extraindo números do texto...');
+            const numbers = this.extractNumbers(text);
+            console.log('✅ Extração de números concluída:', numbers);
+            
+            return numbers;
         } catch (error) {
-            console.error('Erro no OCR:', error);
+            console.error('❌ Erro no OCR:', error);
             console.error('Stack trace completo:', error.stack);
             // Em vez de retornar números aleatórios, mostrar erro específico
             throw new Error(`Falha no processamento OCR: ${error.message}. Por favor, tente novamente com uma imagem mais clara.`);
@@ -502,54 +533,32 @@ class LotteryScanner {
 
     async performGoogleCloudVisionOCR(file) {
         try {
-            // Verificar se a API Key está configurada
-            if (!window.CONFIG.GOOGLE_CLOUD_CONFIG.apiKey) {
-                throw new Error('API Key do Google Cloud Vision não configurada');
-            }
+            // Criar FormData para enviar o arquivo para o backend
+            const formData = new FormData();
+            formData.append('image', file);
 
-            // Converter arquivo para base64
-            const base64Image = await this.fileToBase64(file);
-            
-            // Preparar requisição para Google Cloud Vision API
-            const requestBody = {
-                requests: [{
-                    image: {
-                        content: base64Image.split(',')[1] // Remover prefixo data:image/...
-                    },
-                    features: window.CONFIG.GOOGLE_CLOUD_CONFIG.features,
-                    imageContext: window.CONFIG.GOOGLE_CLOUD_CONFIG.imageContext
-                }]
-            };
-
-            // Fazer requisição para Google Cloud Vision API
-            const response = await fetch(
-                `${window.CONFIG.GOOGLE_CLOUD_CONFIG.endpoint}?key=${window.CONFIG.GOOGLE_CLOUD_CONFIG.apiKey}`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestBody)
-                }
-            );
+            // Fazer requisição POST para o backend local
+            const response = await fetch('/api/ocr', {
+                method: 'POST',
+                body: formData
+            });
 
             if (!response.ok) {
-                throw new Error(`Google Cloud Vision API erro: ${response.status} ${response.statusText}`);
+                throw new Error(`Backend OCR erro: ${response.status} ${response.statusText}`);
             }
 
             const result = await response.json();
             
-            // Extrair texto da resposta
-            if (result.responses && result.responses[0] && result.responses[0].textAnnotations) {
-                const detectedText = result.responses[0].textAnnotations[0].description;
-                console.log('✅ Google Cloud Vision API - Texto detectado:', detectedText);
-                return detectedText;
+            // Extrair texto da resposta do backend
+            if (result.success && result.text) {
+                console.log('✅ Backend OCR - Texto detectado:', result.text);
+                return result.text;
             } else {
-                console.warn('⚠️ Google Cloud Vision API - Nenhum texto detectado');
-                return '';
+                console.warn('⚠️ Backend OCR - Nenhum texto detectado');
+                return result.error || '';
             }
         } catch (error) {
-            console.error('❌ Erro na Google Cloud Vision API:', error);
+            console.error('❌ Erro no Backend OCR:', error);
             throw error;
         }
     }

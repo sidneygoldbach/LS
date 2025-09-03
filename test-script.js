@@ -1,17 +1,23 @@
 // Script de teste para verificar definição da classe
 console.log('🧪 TESTE: Script iniciado');
 
-// Verificar imediatamente se a classe existe
-setInterval(() => {
-    if (typeof LotteryScanner !== 'undefined') {
-        console.log('🧪 TESTE: ✅ Classe LotteryScanner ENCONTRADA!');
-        console.log('🧪 TESTE: Tipo:', typeof LotteryScanner);
-        console.log('🧪 TESTE: Classe:', LotteryScanner);
-        clearInterval(this);
-    } else {
-        console.log('🧪 TESTE: ❌ Classe LotteryScanner ainda não definida');
-    }
-}, 200);
+// Verificar se a classe existe (execução única)
+if (typeof LotteryScanner !== 'undefined') {
+    console.log('🧪 TESTE: ✅ Classe LotteryScanner ENCONTRADA!');
+    console.log('🧪 TESTE: Tipo:', typeof LotteryScanner);
+} else {
+    console.log('🧪 TESTE: ❌ Classe LotteryScanner ainda não definida');
+    
+    // Aguardar um pouco e verificar novamente (apenas uma vez)
+    setTimeout(() => {
+        if (typeof LotteryScanner !== 'undefined') {
+            console.log('🧪 TESTE: ✅ Classe LotteryScanner ENCONTRADA após delay!');
+            console.log('🧪 TESTE: Tipo:', typeof LotteryScanner);
+        } else {
+            console.log('🧪 TESTE: ❌ Classe LotteryScanner ainda não definida após delay');
+        }
+    }, 1000);
+}
 
 // Verificar se o script principal está sendo carregado
 document.addEventListener('DOMContentLoaded', () => {
