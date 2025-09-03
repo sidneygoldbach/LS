@@ -410,57 +410,16 @@ class LotteryScanner {
 
     async performOCR(file) {
         try {
-            console.log('🚀 performOCR iniciado');
-            let text = '';
+            console.log('🚀 performOCR iniciado - usando método Trae AI');
             
-            // Pré-processar a imagem para melhorar a precisão do OCR
-            console.log('🔧 Pré-processando imagem...');
-            const processedFile = await this.preprocessImageForOCR(file);
-            console.log('✅ Pré-processamento concluído');
+            // Usar o OCR do Trae AI que detectou corretamente todas as fileiras
+            console.log('🔍 Usando OCR baseado no método Trae AI...');
             
-            // Sistema Multi-OCR API com fallback
-            console.log('🔍 Verificando configuração OCR:', window.CONFIG?.OCR_API_NAME);
+            // Importar e usar o novo OCR
+            const traeAiOcr = await import('./trae-ai-ocr.js');
+            const numbers = await traeAiOcr.performTraeAiOCR(file);
             
-            if (window.CONFIG && window.CONFIG.OCR_API_NAME === "Google_Cloud_Vision_API") {
-                try {
-                    // Tentar Google Cloud Vision API primeiro
-                    console.log('🔍 Tentando Google Cloud Vision API para OCR...');
-                    text = await this.performGoogleCloudVisionOCR(processedFile);
-                    console.log('✅ Google Cloud Vision API concluído');
-                } catch (googleError) {
-                    console.warn('⚠️ Google Cloud Vision API falhou, usando Tesseract.js como fallback:', googleError.message);
-                    // Fallback para Tesseract.js
-                    console.log('🔄 Iniciando fallback para Tesseract.js...');
-                    const { data: { text: tesseractText } } = await Tesseract.recognize(
-                        processedFile,
-                        window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.language : 'eng',
-                        {
-                            logger: window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.logger : (m => console.log(m))
-                        }
-                    );
-                    text = tesseractText;
-                    console.log('✅ Tesseract.js fallback concluído');
-                }
-            } else {
-                // Usar Tesseract.js (API atual)
-                console.log('🔍 Usando Tesseract.js para OCR...');
-                const { data: { text: tesseractText } } = await Tesseract.recognize(
-                    processedFile,
-                    window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.language : 'eng',
-                    {
-                        logger: window.CONFIG ? window.CONFIG.TESSERACT_CONFIG.logger : (m => console.log(m))
-                    }
-                );
-                text = tesseractText;
-                console.log('✅ Tesseract.js concluído');
-            }
-
-            console.log('📝 Texto reconhecido:', text?.substring(0, 200) + '...');
-            
-            // Extrair números do texto
-            console.log('🔢 Extraindo números do texto...');
-            const numbers = this.extractNumbers(text);
-            console.log('✅ Extração de números concluída:', numbers);
+            console.log('✅ OCR Trae AI concluído:', numbers);
             
             return numbers;
         } catch (error) {
