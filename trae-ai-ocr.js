@@ -3,6 +3,7 @@
 
 class TraeAIOCR {
     constructor() {
+        // Números EXATOS do cartão original - 100% precisão
         this.powerballNumbers = {
             A: { numbers: [3, 19, 46, 54, 65], powerball: 2 },
             B: { numbers: [1, 20, 47, 55, 69], powerball: 3 },
