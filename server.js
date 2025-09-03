@@ -20,8 +20,30 @@ try {
   client = null;
 }
 
-// Middleware de segurança
-app.use(helmet());
+// Middleware de segurança com CSP personalizado
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "https://cdn.jsdelivr.net",
+        "https://docs.opencv.org",
+        "blob:",
+        "data:"
+      ],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'", "blob:"],
+      workerSrc: ["'self'", "blob:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'", "blob:"],
+      frameSrc: ["'none'"]
+    }
+  }
+}));
 
 // Configurar CORS
 app.use(cors({
