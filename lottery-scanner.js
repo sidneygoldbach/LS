@@ -1431,6 +1431,22 @@ class LotteryScanner {
             };
         }
         
+        // Converter objeto de fileiras em array se necessário (formato Trae AI OCR)
+        if (numbers.rows && !Array.isArray(numbers.rows) && typeof numbers.rows === 'object') {
+            console.log('🔄 Convertendo objeto de fileiras em array...');
+            const rowsArray = [];
+            Object.keys(numbers.rows).forEach((letter, index) => {
+                const rowData = numbers.rows[letter];
+                rowsArray.push({
+                    letter: letter,
+                    main: rowData.numbers || rowData.main || [],
+                    powerball: rowData.powerball || 0
+                });
+            });
+            numbers.rows = rowsArray;
+            console.log('✅ Conversão concluída:', numbers.rows);
+        }
+        
         // Verificar se numbers.rows é um array válido
         if (!Array.isArray(numbers.rows)) {
             console.error('Erro: numbers.rows não é um array válido:', numbers.rows);
