@@ -30,7 +30,6 @@ app.use(helmet({
         "'unsafe-inline'",
         "'unsafe-eval'",
         "cdn.jsdelivr.net",
-        "docs.opencv.org",
         "blob:",
         "data:"
       ],

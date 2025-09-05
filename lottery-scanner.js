@@ -3,44 +3,261 @@
 
 class LotteryScanner {
     constructor() {
-        this.initializeElements();
-        this.setupEventListeners();
         this.scannedNumbers = null;
+        this.initializeElements();
+    }
+
+    showCameraModal(stream) {
+        // Criar modal da câmera
+        const cameraModal = document.createElement('div');
+        cameraModal.id = 'cameraModal';
+        cameraModal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        `;
+
+        // Criar vídeo para preview
+        const video = document.createElement('video');
+        video.style.cssText = `
+            max-width: 90%;
+            max-height: 70%;
+            border-radius: 10px;
+        `;
+        video.autoplay = true;
+        video.playsInline = true;
+        video.srcObject = stream;
+
+        // Criar botões
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = `
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+        `;
+
+        const captureBtn = document.createElement('button');
+        captureBtn.textContent = '📸 Capturar';
+        captureBtn.style.cssText = `
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        `;
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = '❌ Cancelar';
+        cancelBtn.style.cssText = `
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        `;
+
+        // Event listeners
+        captureBtn.addEventListener('click', () => {
+            this.capturePhoto(video, stream, cameraModal);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            this.closeCameraModal(stream, cameraModal);
+        });
+
+        // Montar modal
+        buttonContainer.appendChild(captureBtn);
+        buttonContainer.appendChild(cancelBtn);
+        cameraModal.appendChild(video);
+        cameraModal.appendChild(buttonContainer);
+        document.body.appendChild(cameraModal);
+    }
+
+    capturePhoto(video, stream, modal) {
+        // Criar canvas para capturar a imagem
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        
+        // Definir dimensões do canvas
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Desenhar frame atual do vídeo no canvas
+        context.drawImage(video, 0, 0);
+        
+        // Converter para blob
+        canvas.toBlob((blob) => {
+            // Criar arquivo a partir do blob
+            const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+            
+            // Fechar modal da câmera
+            this.closeCameraModal(stream, modal);
+            
+            // Processar imagem capturada
+            this.handleImageFile(file);
+        }, 'image/jpeg', 0.9);
+    }
+
+    closeCameraModal(stream, modal) {
+        // Parar stream da câmera
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Remover modal
+        if (modal && modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+        }
+    }
+
+    async handleImageFile(file) {
+        if (!file) return;
+        
+        try {
+            this.showLoading();
+            const numbers = await this.performOCR(file);
+            this.hideLoading();
+            
+            if (numbers && numbers.length > 0) {
+                this.showNumbersModal(numbers);
+            } else {
+                this.showError('Nenhum número foi encontrado na imagem. Tente uma imagem mais clara.');
+            }
+        } catch (error) {
+            this.hideLoading();
+            console.error('Erro ao processar imagem:', error);
+            this.showError('Erro ao processar a imagem: ' + error.message);
+        }
     }
 
     initializeElements() {
-        // Elementos principais
-        this.fileInput = document.getElementById('file-input');
-        this.uploadButton = document.getElementById('upload-button');
-        this.previewContainer = document.getElementById('preview-container');
-        this.previewImage = document.getElementById('preview-image');
-        this.loadingDiv = document.getElementById('loading');
-        this.errorDiv = document.getElementById('error');
-        this.numbersModal = document.getElementById('numbers-modal');
-        this.closeModalButton = document.getElementById('close-modal');
+        let attempts = 0;
+        const maxAttempts = 20; // Máximo 20 tentativas (1 segundo)
         
-        // Inputs de números
-        this.numberInputs = [
-            document.getElementById('number1'),
-            document.getElementById('number2'),
-            document.getElementById('number3'),
-            document.getElementById('number4'),
-            document.getElementById('number5')
-        ];
-        this.powerballInput = document.getElementById('powerball');
+        // Função para aguardar elementos estarem disponíveis
+        const waitForElements = () => {
+            attempts++;
+            
+            // Elementos principais - IDs corretos do HTML
+            this.fileInput = document.getElementById('imageInput');
+            this.uploadButton = document.getElementById('fileOption') || document.getElementById('scanButton');
+            this.cameraButton = document.getElementById('cameraOption');
+            this.loadingSpinner = document.getElementById('loadingSpinner');
+            this.numbersModal = document.getElementById('numbersModal');
+            this.closeModalButton = document.getElementById('cancelBtn');
+            this.checkNumbersBtn = document.getElementById('checkNumbersBtn');
+            this.resultsModal = document.getElementById('resultsModal');
+            this.finishBtn = document.getElementById('finishBtn');
+            
+            // Inputs de números - usando classes do HTML
+            this.numberInputs = document.querySelectorAll('.number-input');
+            this.powerballInput = document.querySelector('.powerball-input');
+            this.stateSelect = document.getElementById('stateSelect');
+            
+            // Verificar se elementos essenciais foram encontrados ou se excedeu tentativas
+            if ((this.fileInput && this.uploadButton) || attempts >= maxAttempts) {
+                if (this.fileInput && this.uploadButton) {
+                    console.log('✅ Elementos principais encontrados');
+                } else {
+                    console.log('⚠️ Elementos não encontrados após', maxAttempts, 'tentativas. Continuando sem alguns elementos.');
+                }
+                this.setupEventListeners();
+            } else {
+                console.log('⏳ Aguardando elementos... (tentativa', attempts + '/' + maxAttempts + ')', {
+                    fileInput: !!this.fileInput,
+                    uploadButton: !!this.uploadButton
+                });
+                setTimeout(waitForElements, 50);
+            }
+        };
+        
+        waitForElements();
     }
 
     setupEventListeners() {
-        this.uploadButton.addEventListener('click', () => this.fileInput.click());
-        this.fileInput.addEventListener('change', (e) => this.handleImageSelect(e));
-        this.closeModalButton.addEventListener('click', () => this.closeNumbersModal());
+        // Verificações de null para evitar erros intermitentes
+        if (!this.fileInput) {
+            console.error('Elemento fileInput não encontrado');
+            return;
+        }
         
-        // Fechar modal clicando fora
-        this.numbersModal.addEventListener('click', (e) => {
-            if (e.target === this.numbersModal) {
-                this.closeNumbersModal();
+        if (!this.uploadButton) {
+            console.warn('Elemento uploadButton não encontrado, alguns recursos podem não funcionar');
+        }
+        
+        // Botão principal de scan (se existir)
+        if (this.uploadButton) {
+            this.uploadButton.addEventListener('click', () => this.fileInput.click());
+        }
+        
+        // Botão de câmera (se existir)
+        if (this.cameraButton) {
+            this.cameraButton.addEventListener('click', () => this.openCamera());
+        }
+        
+        // Input de arquivo
+        this.fileInput.addEventListener('change', (e) => this.handleImageSelect(e));
+        
+        // Botões do modal de números (com verificação)
+        if (this.closeModalButton) {
+            this.closeModalButton.addEventListener('click', () => this.closeNumbersModal());
+        }
+        if (this.checkNumbersBtn) {
+            this.checkNumbersBtn.addEventListener('click', () => this.checkNumbers());
+        }
+        
+        // Botão do modal de resultados (com verificação)
+        if (this.finishBtn) {
+            this.finishBtn.addEventListener('click', () => this.closeResultsModal());
+        }
+        
+        // Fechar modal clicando fora (com verificação)
+        if (this.numbersModal) {
+            this.numbersModal.addEventListener('click', (e) => {
+                if (e.target === this.numbersModal) {
+                    this.closeNumbersModal();
+                }
+            });
+        }
+    }
+
+    async openCamera() {
+        try {
+            // Verificar se o navegador suporta getUserMedia
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                this.showError('Câmera não suportada neste navegador');
+                return;
             }
-        });
+
+            // Solicitar acesso à câmera
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' } // Preferir câmera traseira
+            });
+
+            // Criar modal para câmera
+            this.showCameraModal(stream);
+        } catch (error) {
+            console.error('Erro ao acessar câmera:', error);
+            if (error.name === 'NotAllowedError') {
+                this.showError('Acesso à câmera negado. Permita o acesso para usar esta funcionalidade.');
+            } else if (error.name === 'NotFoundError') {
+                this.showError('Nenhuma câmera encontrada no dispositivo.');
+            } else {
+                this.showError('Erro ao acessar câmera: ' + error.message);
+            }
+        }
     }
 
     async handleImageSelect(event) {
@@ -228,6 +445,53 @@ class LotteryScanner {
         this.numbersModal.classList.add('hidden');
     }
 
+    checkNumbers() {
+        // Coletar números dos inputs
+        const numbers = [];
+        this.numberInputs.forEach(input => {
+            const value = parseInt(input.value);
+            if (value >= 1 && value <= 69) {
+                numbers.push(value);
+            }
+        });
+        
+        const powerball = parseInt(this.powerballInput.value);
+        const state = this.stateSelect.value;
+        
+        if (numbers.length === 5 && powerball >= 1 && powerball <= 26 && state) {
+            this.showResults(numbers, powerball, state);
+        } else {
+            alert('Por favor, preencha todos os números corretamente e selecione um estado.');
+        }
+    }
+
+    showResults(numbers, powerball, state) {
+        this.closeNumbersModal();
+        
+        const resultsContent = document.getElementById('resultsContent');
+        resultsContent.innerHTML = `
+            <div class="results-summary">
+                <h3>Seus Números:</h3>
+                <div class="numbers-display">
+                    <span class="main-numbers">${numbers.join(' - ')}</span>
+                    <span class="powerball-display">PB: ${powerball}</span>
+                </div>
+                <p><strong>Estado:</strong> ${state}</p>
+                <p class="success-message">✅ Números verificados com sucesso!</p>
+            </div>
+        `;
+        
+        this.resultsModal.classList.remove('hidden');
+    }
+
+    closeResultsModal() {
+        this.resultsModal.classList.add('hidden');
+        // Reset do formulário
+        this.numberInputs.forEach(input => input.value = '');
+        this.powerballInput.value = '';
+        this.stateSelect.value = '';
+    }
+
     validateMainNumber(input) {
         const value = parseInt(input.value);
         if (value < 1 || value > 69) {
@@ -247,25 +511,33 @@ class LotteryScanner {
     }
 
     showLoading() {
-        this.loadingDiv.classList.remove('hidden');
+        const scanText = document.getElementById('scanText');
+        if (scanText) scanText.style.display = 'none';
+        if (this.loadingSpinner) {
+            this.loadingSpinner.classList.remove('hidden');
+        }
     }
 
     hideLoading() {
-        this.loadingDiv.classList.add('hidden');
+        const scanText = document.getElementById('scanText');
+        if (scanText) scanText.style.display = 'inline';
+        if (this.loadingSpinner) {
+            this.loadingSpinner.classList.add('hidden');
+        }
     }
 
     showError(message) {
-        this.errorDiv.textContent = message;
-        this.errorDiv.classList.remove('hidden');
+        alert(message); // Usando alert temporariamente
+        this.hideLoading();
     }
 
     hideError() {
-        this.errorDiv.classList.add('hidden');
+        // Método mantido para compatibilidade
     }
 }
 
 // Inicializar quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Inicializando Lottery Scanner Limpo...');
+    console.log('🚀 Inicializando Lottery Scanner...');
     new LotteryScanner();
 });

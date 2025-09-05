@@ -5,7 +5,7 @@ const urlsToCache = [
     '/lottery-scanner.html',
     '/lottery-scanner.css',
     '/lottery-scanner.js',
-    'https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'
+    '/trae-ai-ocr.js'
 ];
 
 // Instalar Service Worker

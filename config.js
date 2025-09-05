@@ -3,9 +3,9 @@
 
 // ===== CONFIGURAÇÃO DE OCR API =====
 // Valores possíveis:
-// - "Tesseract" (API atual em uso)
+// - "Trae_AI_OCR" (API atual em uso)
 // - "Google_Cloud_Vision_API" (nova API a ser implementada)
-const OCR_API_NAME = "Tesseract";
+const OCR_API_NAME = "Trae_AI_OCR";
 
 // ===== CONFIGURAÇÕES GOOGLE CLOUD VISION API =====
 // Configurações para quando OCR_API_NAME = "Google_Cloud_Vision_API"
@@ -37,10 +37,10 @@ const GOOGLE_CLOUD_CONFIG = {
     }
 };
 
-// ===== CONFIGURAÇÕES TESSERACT =====
-// Configurações para quando OCR_API_NAME = "Tesseract"
-const TESSERACT_CONFIG = {
-    language: 'eng',
+// ===== CONFIGURAÇÕES TRAE AI OCR =====
+// Configurações para quando OCR_API_NAME = "Trae_AI_OCR"
+const TRAE_AI_OCR_CONFIG = {
+    simulateOCR: true,
     logger: m => console.log(m)
 };
 
@@ -50,13 +50,13 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         OCR_API_NAME,
         GOOGLE_CLOUD_CONFIG,
-        TESSERACT_CONFIG
+        TRAE_AI_OCR_CONFIG
     };
 } else {
     // Browser
     window.CONFIG = {
         OCR_API_NAME,
         GOOGLE_CLOUD_CONFIG,
-        TESSERACT_CONFIG
+        TRAE_AI_OCR_CONFIG
     };
 }
