@@ -3,9 +3,14 @@
 
 class LotteryScanner {
     constructor() {
-        this.scannedNumbers = null;
-        this.initializeElements();
-    }
+            this.scannedNumbers = null;
+            console.log('🔍 DEBUG - Constructor chamado');
+            console.log('DOM readyState:', document.readyState);
+            console.log('Elementos no DOM no momento da construção:');
+            console.log('- previewImage existe:', !!document.getElementById('previewImage'));
+            console.log('- previewContainer existe:', !!document.getElementById('previewContainer'));
+            this.initializeElements();
+        }
 
     showCameraModal(stream) {
         // Criar modal da câmera
@@ -166,6 +171,19 @@ class LotteryScanner {
             this.powerballInput = document.querySelector('.powerball-input');
             this.stateSelect = document.getElementById('stateSelect');
             
+            // DEBUG: Verificar elementos de preview durante inicialização
+            console.log('🔍 DEBUG - Inicializando elementos de preview...');
+            
+            // Elementos de preview de imagem
+            this.previewImage = document.getElementById('previewImage');
+            this.previewContainer = document.getElementById('previewContainer');
+            
+            console.log('DEBUG - Após inicialização:');
+            console.log('this.previewImage:', this.previewImage);
+            console.log('this.previewContainer:', this.previewContainer);
+            console.log('Elemento previewImage no DOM:', document.getElementById('previewImage'));
+            console.log('Elemento previewContainer no DOM:', document.getElementById('previewContainer'));
+            
             // Verificar se elementos essenciais foram encontrados ou se excedeu tentativas
             if ((this.fileInput && this.uploadButton) || attempts >= maxAttempts) {
                 if (this.fileInput && this.uploadButton) {
@@ -270,10 +288,25 @@ class LotteryScanner {
             this.showLoading();
             this.hideError();
             
+            // DEBUG: Verificar se elementos de preview existem
+            console.log('🔍 DEBUG - Elementos de preview:');
+            console.log('this.previewImage:', this.previewImage);
+            console.log('this.previewContainer:', this.previewContainer);
+            console.log('previewImage existe no DOM:', document.getElementById('previewImage'));
+            console.log('previewContainer existe no DOM:', document.getElementById('previewContainer'));
+            
             // Mostrar preview da imagem
             const imageUrl = URL.createObjectURL(file);
-            this.previewImage.src = imageUrl;
-            this.previewContainer.classList.remove('hidden');
+            if (this.previewImage && this.previewContainer) {
+                this.previewImage.src = imageUrl;
+                this.previewContainer.classList.remove('hidden');
+                console.log('✅ Preview configurado com sucesso');
+            } else {
+                console.error('❌ Elementos de preview não encontrados:', {
+                    previewImage: this.previewImage,
+                    previewContainer: this.previewContainer
+                });
+            }
             
             console.log('🚀 Iniciando OCR Trae AI...');
             
@@ -539,5 +572,15 @@ class LotteryScanner {
 // Inicializar quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Inicializando Lottery Scanner...');
-    new LotteryScanner();
+    console.log('🔍 DEBUG - Verificando elementos antes da inicialização:');
+    console.log('- previewImage existe no DOM:', !!document.getElementById('previewImage'));
+    console.log('- previewContainer existe no DOM:', !!document.getElementById('previewContainer'));
+    
+    // Pequeno delay para garantir que todos os elementos estejam disponíveis
+    setTimeout(() => {
+        console.log('🔍 DEBUG - Verificando elementos após delay:');
+        console.log('- previewImage existe no DOM:', !!document.getElementById('previewImage'));
+        console.log('- previewContainer existe no DOM:', !!document.getElementById('previewContainer'));
+        new LotteryScanner();
+    }, 100);
 });

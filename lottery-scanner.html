@@ -54,6 +54,11 @@
             
             <!-- Input oculto para captura de imagem -->
             <input type="file" id="imageInput" accept="image/*" capture="environment" style="display: none;">
+            
+            <!-- Container de preview da imagem -->
+            <div id="previewContainer" class="preview-container hidden">
+                <img id="previewImage" class="preview-image" alt="Preview da imagem capturada">
+            </div>
         </main>
         
         <!-- Modal para edição de números -->
@@ -81,6 +86,9 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Container para múltiplas linhas de números -->
+                <div id="multiple-rows-display" class="multiple-rows-display hidden"></div>
                 
                 <div class="state-section">
                     <label for="stateSelect">Estado:</label>

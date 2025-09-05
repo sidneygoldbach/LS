@@ -144,6 +144,96 @@ header p {
     display: none !important;
 }
 
+/* Estilos para preview de imagem */
+.preview-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 300px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Estilos para múltiplas linhas de números */
+.multiple-rows-display {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.powerball-ticket-layout {
+    width: 100%;
+}
+
+.numbers-matrix {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.number-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.row-label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #495057;
+    min-width: 20px;
+    text-align: center;
+}
+
+.number-row .main-numbers {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+}
+
+.number-row .main-numbers input {
+    width: 50px;
+    height: 40px;
+    text-align: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.number-row .powerball-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.number-row .powerball-section label {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0;
+}
+
+.number-row .powerball-section input {
+    width: 50px;
+    height: 40px;
+    text-align: center;
+    border: 2px solid #dc3545;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    background: #fff5f5;
+}
+
 /* Modal */
 .modal {
     position: fixed;
